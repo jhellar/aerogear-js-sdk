@@ -46,11 +46,10 @@ node ('osx2') {
     stage("Build ${platform}") {
       try {
         dir('cordova-example') {
-          if (platform == 'android') {
-            sh "ionic cordova build android"
-          } else {
-            sh "ionic cordova build ios --emulator"
-          }
+          sh """
+            npm run ionic:build
+            ionic cordova build ${platform} --emulator
+          """
         }
       } catch (Exception e) {
         currentBuild.result = 'FAILURE'
@@ -60,13 +59,12 @@ node ('osx2') {
     stage ("Run integration test for ${platform}") {
       try {
         dir('cordova-example/tests') {
-          env.PLATFORM = platform
-          sh '''
+          sh """
             rm opts.json || true
-            cp opts_${PLATFORM}.json opts.json
+            cp opts_${platform}.json opts.json
             JUNIT_REPORT_PATH=report.xml JUNIT_REPORT_STACK=1 npm start -- --reporter mocha-jenkins-reporter
-            mv report.xml report_${PLATFORM}.xml
-          '''
+            mv report.xml report_${platform}.xml
+          """
         }
       } catch (Exception e) {
         currentBuild.result = 'FAILURE'
