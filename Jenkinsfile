@@ -10,13 +10,13 @@ node ('osx2') {
     sh 'git clone git@github.com:jhellar/cordova-showcase-template.git cordova-example'
     dir('cordova-example') {
       sh 'git checkout jenkinsTest2'
-    }
 
-    // Restart appium
-    sh """
-      lsof -i tcp:4723 | grep LISTEN | awk '{print \$2}' | xargs kill
-      nohup appium &>"\$HOME/appium.log" </dev/null &
-    """
+      // Restart appium
+      sh """
+        lsof -i tcp:4723 | grep LISTEN | awk '{print \$2}' | xargs kill
+        nohup appium &>"\$HOME/appium.log" </dev/null &
+      """
+    }
   }
 
   stage ('Install dependencies') {
@@ -46,7 +46,11 @@ node ('osx2') {
     stage("Build ${platform}") {
       try {
         dir('cordova-example') {
-          sh "ionic cordova build ${platform} --emulator"
+          if (platform == 'android') {
+            sh "ionic cordova build android"
+          } else {
+            sh "ionic cordova build ios --emulator"
+          }
         }
       } catch (Exception e) {
         currentBuild.result = 'FAILURE'
