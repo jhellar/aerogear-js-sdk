@@ -40,7 +40,7 @@ node ('osx2') {
     }
   }
 
-  def platforms = ['android', 'ios']
+  def platforms = ['ios', 'android']
   for (int i = 0; i < platforms.size(); i++) {
     platform = platforms[i]                      
     stage("Build ${platform}") {
