@@ -46,7 +46,7 @@ node ('osx2') {
     stage("Build ${platform}") {
       try {
         dir('cordova-example') {
-          sh "ionic cordova build ${platform}"
+          sh "ionic cordova build ${platform} --emulator"
         }
       } catch (Exception e) {
         currentBuild.result = 'FAILURE'
