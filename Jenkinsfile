@@ -9,7 +9,7 @@ node ('osx2') {
     // Clone example app
     sh 'git clone git@github.com:jhellar/cordova-showcase-template.git cordova-example'
     dir('cordova-example') {
-      sh 'git checkout jenkinsTest'
+      sh 'git checkout jenkinsTest2'
     }
 
     // Restart appium
