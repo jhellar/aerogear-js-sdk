@@ -55,7 +55,8 @@ describe('AeroGear Apollo GraphQL Voyager client', function() {
     expect(offlineMutationStore[0]).to.exist;
     expect(offlineMutationStore[0].operation).to.exist;
     expect(offlineMutationStore[0].operation.operationName).to.equal('createTask');
-    expect(offlineMutationStore[0].operation.variables).to.deep.equal(newTask);
+    expect(offlineMutationStore[0].operation.variables.title).to.equal(newTask.title);
+    expect(offlineMutationStore[0].operation.variables.description).to.equal(newTask.description);
   });
 
   it('should send mutation when going back online', async function() {

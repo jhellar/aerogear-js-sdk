@@ -25,6 +25,12 @@ export interface OperationQueueEntry {
   optimisticResponse?: any;
 }
 
+interface ForwardOptions {
+  forward: NextLink;
+  operation: Operation;
+  observer: Observer<FetchResult>;
+}
+
 /**
  * Type used for filtering
  */
@@ -64,6 +70,10 @@ export class OfflineQueueLink extends ApolloLink {
     this.operationFilter = filter;
   }
 
+  public get isQueueOpen() {
+    return this.isOpen;
+  }
+
   public async open() {
     logger("MutationQueue is open", this.opQueue);
     this.isOpen = true;
@@ -75,26 +85,16 @@ export class OfflineQueueLink extends ApolloLink {
 
     this.processingQueue = true;
 
-    for (const opEntry of this.opQueue) {
-      const { operation, forward, observer } = opEntry;
-      await new Promise(resolve => {
-        forward(operation).subscribe({
-          next: result => {
-            this.updateIds(opEntry, result);
-            this.storage.setItem(this.key, JSON.stringify(this.opQueue));
-            if (observer.next) { observer.next(result); }
-          },
-          error: error => {
-            if (observer.error) { observer.error(error); }
-          },
-          complete: () => {
-            if (observer.complete) { observer.complete(); }
-            resolve();
-          }
-        });
-      });
+    while (this.opQueue.length > 0) {
+      try {
+        const opEntry = this.opQueue[0];
+        const result = await this.forwardOperation(this.opQueue[0]);
+
+        this.updateIds(opEntry, result);
+      } catch (_) {
+        continue;
+      }
     }
-    this.opQueue = [];
 
     this.processingQueue = false;
 
@@ -110,10 +110,6 @@ export class OfflineQueueLink extends ApolloLink {
 
   public request(operation: Operation, forward: NextLink) {
     if (!operation.variables.__enqueueMutation) {
-      if (this.isOpen) {
-        logger("Forwarding request");
-        return forward(operation);
-      }
       if (hasDirectives([localDirectives.ONLINE_ONLY], operation.query)) {
         logger("Online only request");
         return forward(operation);
@@ -121,13 +117,67 @@ export class OfflineQueueLink extends ApolloLink {
       if (this.shouldSkipOperation(operation, this.operationFilter)) {
         return forward(operation);
       }
+
+      if (this.isOpen && this.opQueue.length === 0 && !this.processingQueue) {
+        logger("Forwarding request");
+        return this.forwardOrEnqueue(forward, operation);
+      }
     }
 
     return new Observable(observer => {
-      const optimisticResponse = operation.getContext().optimisticResponse;
-      const operationEntry = { operation, forward, observer, optimisticResponse };
-      this.enqueue(operationEntry);
+      const operationEntry = this.enqueue({ operation, forward, observer });
       return () => this.cancelOperation(operationEntry);
+    });
+  }
+
+  private forwardOrEnqueue(forward: NextLink, operation: Operation) {
+    return new Observable(observer => {
+      const forwardOptions = { forward, operation, observer };
+
+      let operationEntry: OperationQueueEntry;
+
+      const asyncForward = async () => {
+        try {
+          await this.forwardOperation(forwardOptions);
+        } catch (error) {
+          if (error.__networkError) {
+            operation.variables.__processQueue = true;
+            operationEntry = this.enqueue(forwardOptions);
+          }
+        }
+      };
+
+      asyncForward();
+
+      return () => {
+        if (operationEntry) { this.cancelOperation(operationEntry); }
+      };
+    });
+  }
+
+  private forwardOperation(options: ForwardOptions) {
+    const { forward, operation, observer } = options;
+
+    return new Promise((resolve, reject) => {
+      forward(operation).subscribe({
+        next: result => {
+          resolve(result);
+          if (observer.next) { observer.next(result); }
+        },
+        error: error => {
+          if (operation.variables.__networkError) {
+            delete operation.variables.__networkError;
+            error.__networkError = true;
+            reject(error);
+          } else {
+            reject(error);
+            if (observer.error) { observer.error(error); }
+          }
+        },
+        complete: () => {
+          if (observer.complete) { observer.complete(); }
+        }
+      });
     });
   }
 
@@ -136,8 +186,12 @@ export class OfflineQueueLink extends ApolloLink {
     this.storage.setItem(this.key, JSON.stringify(this.opQueue));
   }
 
-  private enqueue(entry: OperationQueueEntry) {
+  private enqueue(forwardOptions: ForwardOptions): OperationQueueEntry {
     logger("Adding new operation to offline queue");
+    const { forward, operation, observer } = forwardOptions;
+    operation.variables.__offlineQueue = true;
+    const optimisticResponse = operation.getContext().optimisticResponse;
+    const entry = { operation, forward, observer, optimisticResponse };
     if (this.listener && this.listener.onOperationEnqueued) {
       this.listener.onOperationEnqueued(entry);
     }
@@ -150,6 +204,7 @@ export class OfflineQueueLink extends ApolloLink {
     if (this.isOpen && entry.operation.variables.__processQueue) {
       this.processQueue();
     }
+    return entry;
   }
 
   private shouldSkipOperation(operation: Operation, filter?: string) {
