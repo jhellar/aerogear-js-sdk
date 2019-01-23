@@ -161,6 +161,9 @@ export class OfflineQueueLink extends ApolloLink {
     return new Promise((resolve, reject) => {
       forward(operation).subscribe({
         next: result => {
+          if (this.listener && this.listener.onOperationSuccess) {
+            this.listener.onOperationSuccess(operation, result);
+          }
           resolve(result);
           if (observer.next) { observer.next(result); }
         },
@@ -170,6 +173,9 @@ export class OfflineQueueLink extends ApolloLink {
             error.__networkError = true;
             reject(error);
           } else {
+            if (this.listener && this.listener.onOperationFailure) {
+              this.listener.onOperationFailure(operation, error);
+            }
             reject(error);
             if (observer.error) { observer.error(error); }
           }
