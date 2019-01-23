@@ -42,6 +42,7 @@ export type TYPE_MUTATION = "mutation" | "query";
 export class OfflineQueueLink extends ApolloLink {
   private opQueue: OperationQueueEntry[] = [];
   private isOpen: boolean = true;
+  private processingQueue: boolean = false;
   private storage: PersistentStore<PersistedData>;
   private readonly key: string;
   private readonly networkStatus?: NetworkStatus;
@@ -66,6 +67,14 @@ export class OfflineQueueLink extends ApolloLink {
   public async open() {
     logger("MutationQueue is open", this.opQueue);
     this.isOpen = true;
+    await this.processQueue();
+  }
+
+  public async processQueue() {
+    if (this.processingQueue) { return; }
+
+    this.processingQueue = true;
+
     for (const opEntry of this.opQueue) {
       const { operation, forward, observer } = opEntry;
       await new Promise(resolve => {
@@ -86,6 +95,9 @@ export class OfflineQueueLink extends ApolloLink {
       });
     }
     this.opQueue = [];
+
+    this.processingQueue = false;
+
     if (this.listener && this.listener.queueCleared) {
       this.listener.queueCleared();
     }
@@ -97,16 +109,18 @@ export class OfflineQueueLink extends ApolloLink {
   }
 
   public request(operation: Operation, forward: NextLink) {
-    if (this.isOpen) {
-      logger("Forwarding request");
-      return forward(operation);
-    }
-    if (hasDirectives([localDirectives.ONLINE_ONLY], operation.query)) {
-      logger("Online only request");
-      return forward(operation);
-    }
-    if (this.shouldSkipOperation(operation, this.operationFilter)) {
-      return forward(operation);
+    if (!operation.variables.__enqueueMutation) {
+      if (this.isOpen) {
+        logger("Forwarding request");
+        return forward(operation);
+      }
+      if (hasDirectives([localDirectives.ONLINE_ONLY], operation.query)) {
+        logger("Online only request");
+        return forward(operation);
+      }
+      if (this.shouldSkipOperation(operation, this.operationFilter)) {
+        return forward(operation);
+      }
     }
 
     return new Observable(observer => {
@@ -133,6 +147,9 @@ export class OfflineQueueLink extends ApolloLink {
       this.opQueue.push(entry);
     }
     this.storage.setItem(this.key, JSON.stringify(this.opQueue));
+    if (this.isOpen && entry.operation.variables.__processQueue) {
+      this.processQueue();
+    }
   }
 
   private shouldSkipOperation(operation: Operation, filter?: string) {

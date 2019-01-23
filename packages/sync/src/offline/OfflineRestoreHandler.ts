@@ -42,27 +42,26 @@ export class OfflineRestoreHandler {
     if (!this.hasOfflineData()) { return; }
 
     logger("Replying offline mutations after application restart");
-    // return as promise, but in the end clear the storage
-    const uncommittedOfflineMutation: OperationQueueEntry[] = [];
 
-    await Promise.all(this.offlineData.map(async (item) => {
-      try {
-        await this.apolloClient.mutate({
-          variables: item.operation.variables,
-          mutation: item.operation.query,
-          context: item.operation.getContext
-        });
-      } catch (e) {
-        // set the errored mutation to the stash
-        uncommittedOfflineMutation.push(item);
-      }
-    }));
+    // clear offline data from storage and push all offline mutations
+    // back to offline queue
 
-    // wait before it was cleared
-    await this.clearOfflineData();
+    this.clearOfflineData();
 
-    // then add again the uncommited storage
-    this.addOfflineData(uncommittedOfflineMutation);
+    this.offlineData.forEach((item, index) => {
+      const last = index === this.offlineData.length - 1;
+      this.apolloClient.mutate({
+        variables: {
+          ...item.operation.variables,
+          __enqueueMutation: true,
+          __processQueue: last
+        },
+        mutation: item.operation.query,
+        optimisticResponse: item.optimisticResponse
+      });
+    });
+
+    this.offlineData = [];
   }
 
   private getOfflineData = async () => {
@@ -74,14 +73,6 @@ export class OfflineRestoreHandler {
   }
 
   private clearOfflineData = async () => {
-    this.offlineData = [];
-    return this.storage.removeItem(this.storageKey);
-  }
-
-  private addOfflineData = (queue: OperationQueueEntry[] = []) => {
-    // add only if there is a value
-    if (queue && queue.length > 0) {
-      this.storage.setItem(this.storageKey, JSON.stringify(queue));
-    }
+    this.storage.setItem(this.storageKey, JSON.stringify([]));
   }
 }

@@ -146,7 +146,7 @@ describe('AeroGear Apollo GraphQL Voyager client', function() {
     expect(task.title).to.equal(updatedTask.title);
   });
 
-  it.skip('should be possible to create then update item while offline then replaying mutations', async function() {
+  it('should be possible to create then update item while offline then replaying mutations', async function() {
     await client.mutate({
       mutation: DELETE_TASK,
       variables: { id: task.id },
@@ -178,6 +178,8 @@ describe('AeroGear Apollo GraphQL Voyager client', function() {
     };
 
     client = await createClient(config);
+
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     const response = await client.query({
       query: GET_TASKS,
