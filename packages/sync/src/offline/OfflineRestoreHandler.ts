@@ -4,6 +4,8 @@ import { PersistentStore, PersistedData } from "../PersistentStore";
 import { OperationQueueEntry } from "../links/OfflineQueueLink";
 import { MUTATION_QUEUE_LOGGER } from "../config/Constants";
 import * as debug from "debug";
+import ProxyUpdate from "../ProxyUpdate";
+import { getMutationName } from "../utils/helpers";
 
 export const logger = debug.default(MUTATION_QUEUE_LOGGER);
 /**
@@ -17,13 +19,16 @@ export class OfflineRestoreHandler {
   private storage: PersistentStore<PersistedData>;
   private readonly storageKey: string;
   private offlineData: OperationQueueEntry[] = [];
+  private readonly proxyUpdate?: ProxyUpdate;
 
   constructor(apolloClient: ApolloClient<NormalizedCacheObject>,
               storage: PersistentStore<PersistedData>,
-              storageKey: string) {
+              storageKey: string,
+              proxyUpdate?: ProxyUpdate) {
     this.apolloClient = apolloClient;
     this.storage = storage;
     this.storageKey = storageKey;
+    this.proxyUpdate = proxyUpdate;
   }
 
   /**
@@ -49,7 +54,14 @@ export class OfflineRestoreHandler {
     this.clearOfflineData();
 
     this.offlineData.forEach((item, index) => {
+      let updateFn;
+      const mutationName = getMutationName(item.operation.query);
+      if (this.proxyUpdate && mutationName) {
+        updateFn = this.proxyUpdate(mutationName);
+      }
+
       const last = index === this.offlineData.length - 1;
+
       this.apolloClient.mutate({
         variables: {
           ...item.operation.variables,
@@ -57,7 +69,8 @@ export class OfflineRestoreHandler {
           __processQueue: last
         },
         mutation: item.operation.query,
-        optimisticResponse: item.optimisticResponse
+        optimisticResponse: item.optimisticResponse,
+        update: updateFn
       });
     });
 
