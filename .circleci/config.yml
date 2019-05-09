@@ -148,11 +148,11 @@ workflows:
     jobs:
       - build:
           requires:
-            - integration_test
+            - build_android
           filters:
             tags:
               only: /.*/
-      - integration_test:
+      - build_android:
           # requires:
           #   - build
           filters:
@@ -160,7 +160,7 @@ workflows:
               only: /.*/
       - npm_publish:
           requires:
-            - integration_test
+            - build_android
           filters:
             tags:
               only: /.*/ # allow anything because tag syntax is validated as part of validate-release.sh
