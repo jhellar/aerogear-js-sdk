@@ -1,4 +1,6 @@
-export { SecurityCheck } from "./SecurityCheck";
-export { SecurityCheckType } from "./SecurityCheckType";
-export { SecurityCheckResult } from "./SecurityCheckResult";
+import * as DeviceCheckType from "./DeviceCheckType";
+
+export { DeviceCheck } from "./DeviceCheck";
+export { DeviceCheckType };
+export { DeviceCheckResult } from "./DeviceCheckResult";
 export * from "./checks";

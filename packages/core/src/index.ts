@@ -1,11 +1,14 @@
 /**
  * @module @aerogearservices/core
+ *
+ * Module used to aggregate common functionalities for AeroGear Services SDK's
  */
 import console from "loglevel";
 console.setDefaultLevel(console.levels.WARN);
 
-// Configuration parsers
-export * from "./configuration";
+// Configuration
+export * from "./config";
 
-// Native platform metrics
-export *  from "./metrics";
+export * from "./PlatformUtils";
+
+export * from "./metrics";

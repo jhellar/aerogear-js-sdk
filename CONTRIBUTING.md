@@ -1,4 +1,4 @@
-# Contributing to the AeroGear Web SDK
+# Contributing to the AeroGear JS SDK
 
 The AeroGear Web SDK is part of the [AeroGear project](https://aerogear.org/), see the [Community Page](https://aerogear.org/community) for general guidelines for contributing to the project.
 
@@ -27,4 +27,8 @@ You can reach us at [#aerogear](ircs://chat.freenode.net:6697/aerogear) on [Free
 
 ## Publishing a new version of the SDK
 
-Documentation for preparing a release for the JS sdk is available [here](./docs/releng.adoc)
+Documentation for preparing a release for the JS sdk is available [here](./docs/contrib/releng.adoc)
+
+## JS SDK contributor documentation
+
+See [Contributor documentation](./docs/contrib)

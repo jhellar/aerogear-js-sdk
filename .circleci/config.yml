@@ -4,7 +4,7 @@ jobs:
     working_directory: ~/aerogear
     docker:
       # Node 8 LTS
-      - image: circleci/node:carbon
+      - image: circleci/node:lts-browsers
     steps:
       - checkout
       - run:
@@ -18,6 +18,9 @@ jobs:
       - run:
           name: install-package-dependencies
           command: npm run bootstrap
+      - run:
+          name: run-build
+          command: npm run build
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
@@ -32,6 +35,12 @@ jobs:
       - run:
           name: test
           command: npm test
+      - run:
+          name: coverage
+          command: npm run coverage
+      - run:
+          name: sync integration test
+          command: cd packages/sync && npm run integration-test
       - store_artifacts:
           path: test-results.xml
           prefix: tests
@@ -44,28 +53,45 @@ jobs:
     working_directory: ~/aerogear
     docker:
       # Node 8 LTS
-      - image: circleci/node:carbon
+      - image: circleci/node:lts
     steps:
       - checkout
         # Allows us to authenticate with the npm registry
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
-      - run: CI=true npm run prep-release
-      - run: TAG=$CIRCLE_TAG npm run validate-release
-      - run: npm run publish
+      - run: CI=true npm run release:prep
+      - run: TAG=$CIRCLE_TAG npm run release:validate
+      - run: TAG=$CIRCLE_TAG npm run publish
+  integration_test:
+    working_directory: ~/aerogear
+    docker:
+      - image: circleci/node:lts
+      - image: verdaccio/verdaccio
+        name: verdaccio_instance
+    steps:
+      - run: npm set registry http://verdaccio_instance:4873/
+      - run: npx npm-cli-login -u test -p test -e test@example.com -r http://verdaccio_instance:4873
 
 workflows:
   version: 2
   build_and_release:
     jobs:
       - build:
+          requires:
+            - integration_test
+          filters:
+            tags:
+              only: /.*/
+      - integration_test:
+          # requires:
+          #   - build
           filters:
             tags:
               only: /.*/
       - npm_publish:
           requires:
-            - build
+            - integration_test
           filters:
             tags:
-              only: /\d\.\d\.\d/
+              only: /.*/ # allow anything because tag syntax is validated as part of validate-release.sh
             branches:
               ignore: /.*/

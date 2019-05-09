@@ -1,5 +1,10 @@
 {
   "extends": "tslint:recommended",
+  "linterOptions": {
+    "exclude": [
+      "node_modules/**"
+    ]
+  },
   "rules": {
     "jsdoc-format":false,
     "quotemark": [
@@ -38,6 +43,7 @@
     "no-unused-variable": true,
     "interface-name": [
       false
-    ]
+    ],
+    "ordered-imports": false
   }
 }

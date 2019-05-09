@@ -8,6 +8,15 @@ yarn-error.log*
 lerna-debug.log*
 dump.rdb
 
+# antora
+
+/docs/build/
+/docs/node_modules/
+/docs/.cache/
+
+offline-conflict-strategies/
+
+
 # Runtime data
 pids
 *.pid
@@ -68,13 +77,17 @@ typings/
 npm-shrinkwrap.json
 package-lock.json
 
-.vscode/
-
 ## Dist folders
 dist
 types
 **/bundle.js
 
+## Rebase/merge backup
+*.orig
+
 cordova-example
 
 docs/api/**
+
+docs/docs.aerogear.org
+

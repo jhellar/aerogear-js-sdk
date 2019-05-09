@@ -1,6 +1,7 @@
 # AeroGear JavaScript SDK
 
 [![circle-ci](https://img.shields.io/circleci/project/github/aerogear/aerogear-js-sdk/master.svg)](https://circleci.com/gh/aerogear/aerogear-js-sdk)
+[![Coverage Status](https://coveralls.io/repos/github/aerogear/aerogear-js-sdk/badge.svg?branch=master)](https://coveralls.io/github/aerogear/aerogear-js-sdk?branch=master)
 [![License](https://img.shields.io/badge/-Apache%202.0-blue.svg)](https://opensource.org/s/Apache-2.0)
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lernajs.io/)
 
@@ -8,39 +9,34 @@
 | --------------- | ---------------------------------------------------------------- |
 | License:        | Apache License, Version 2.0                                      |
 | Build:          | NPM                                                              |
-| Issue tracker:  | https://issues.jboss.org/browse/AGCORDOVA                        |
-| Mailing lists:  | [aerogear-users](http://aerogear-users.1116366.n5.nabble.com/)   |
-|                 | [aerogear-dev](https://groups.google.com/forum/#!forum/aerogear) |
+| End User Documentation:  | https://docs.aerogear.org|
+| Community Documentation: | https://www.aerogear.org             |
+| Issue tracker:  | https://issues.jboss.org/browse/AEROGEAR                        |
+| Mailing lists:  | [aerogear-dev](https://groups.google.com/forum/#!forum/aerogear) |
 
-AeroGear SDK for JavaScript, Apache Cordova and React Native.
+## Showcase application
 
-## Documentation
+To try out the latest release of the SDK go to our [Ionic Showcase Application](https://github.com/aerogear/ionic-showcase)
 
-1. [End User Getting Started Guide](./docs/getting-started.adoc)
-1. [Service Contributor Guide](./docs/contributing-guide.adoc)
+### List of Modules
 
-### List of SDKs
+This Aerogear SDK consists of a set of SDK's.
 
-AeroGear Services SDK consist of set of separate SDKs
+- Auth - Mobile Application Auth SDK
+- Metrics - Mobile Application Metrics SDK
+- Security - Mobile Application Security SDK
+- Push - Unified Push Server SDK
+- DataSync - Data Synchronization using Voyager Framework
 
-- [Core](./docs/core/core.adoc): Common base for all SDKs
-- [Auth](./docs/auth/README.adoc): Mobile Auth SDK
-- [Metrics](./docs/metrics/metrics.adoc): Mobile application metrics SDK
 
 ## Contributing
 
-See [General Contributing Guide](./CONTRIBUTING.md)
+- [General Contributing Guide](https://github.com/aerogear/aerogear-js-sdk/blob/master/CONTRIBUTING.md)
+- [Service Contributor Guide](https://github.com/aerogear/aerogear-js-sdk/blob/master/docs/contrib/contributing-guide.adoc)
 
 ## License
 
- See [LICENSE file](./LICENSE)
-
-
-## Development
-
-If you would like to help develop AeroGear you can join our [developer's mailing list](https://groups.google.com/forum/#!forum/aerogear), join #aerogear on Freenode, or shout at us on Twitter @aerogears.
-
-Also takes some time and skim the [contributor guide](CONTRIBUTING.md)
+ See [LICENSE file](https://github.com/aerogear/aerogear-js-sdk/blob/master/LICENSE)
 
 ## Questions?
 
@@ -48,4 +44,4 @@ Join our [user mailing list](https://groups.google.com/forum/#!forum/aerogear) f
 
 ## Found a bug?
 
-If you found a bug please create a ticket for us on [Jira](https://issues.jboss.org/browse/AGJS) with some steps to reproduce it.
+If you found a bug please create a ticket for us on [Jira](https://issues.jboss.org/browse/AEROGEAR) with some steps to reproduce it.

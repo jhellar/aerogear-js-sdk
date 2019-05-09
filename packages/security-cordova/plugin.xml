@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin
     id="cordova-plugin-aerogear-security"
-    version="0.1.0"
+    version="2.4.0"
     xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -9,4 +9,9 @@
 
     <dependency id="cordova-plugin-iroot" version="0.7.0" />
 
+    <dependency id="cordova-plugin-device" version="2.0.2" />
+
+    <dependency id="cordova-plugin-is-debug" version="^1.0.0" />
+
+    <dependency id="cordova-plugin-pincheck" version="0.0.6" />
 </plugin>

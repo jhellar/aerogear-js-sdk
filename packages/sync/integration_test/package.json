@@ -1,0 +1,31 @@
+{
+  "name": "datasync-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for datasync",
+  "scripts": {
+    "pretest": "kill $(lsof -t -i:4001) & node server/index.js &",
+    "test": "karma start",
+    "posttest": "kill $(lsof -t -i:4001) || true"
+  },
+  "author": "AeroGear",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@aerogear/voyager-server": "0.5.1",
+    "apollo-server": "2.4.8",
+    "chai": "4.2.0",
+    "cors": "2.8.5",
+    "express": "4.16.4",
+    "graphql": "14.2.1",
+    "graphql-subscriptions": "1.1.0",
+    "graphql-tag": "2.10.1",
+    "karma": "4.1.0",
+    "karma-chai": "0.1.0",
+    "karma-chrome-launcher": "2.2.0",
+    "karma-mocha": "1.3.0",
+    "karma-mocha-reporter": "2.2.5",
+    "karma-webpack": "3.0.5",
+    "mocha": "6.1.4",
+    "webpack": "4.30.0"
+  },
+  "devDependencies": {}
+}
