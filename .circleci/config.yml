@@ -61,7 +61,7 @@ jobs:
       - run: CI=true npm run release:prep
       - run: TAG=$CIRCLE_TAG npm run release:validate
       - run: TAG=$CIRCLE_TAG npm run publish
-  build_android:
+  build_test_app_android:
     working_directory: ~/aerogear
     docker:
       - image: circleci/android:api-28-node
@@ -136,10 +136,9 @@ jobs:
           command: cordova build android
           working_directory: ~/tests/testing-app
       - persist_to_workspace:
-          root: platforms/android/app/build/outputs/apk/debug/
+          root: ~/tests/testing-app/platforms/android/app/build/outputs/apk/debug/
           paths:
             - app-debug.apk
-          working_directory: ~/tests/testing-app
       - run: echo stop && false
 
 workflows:
@@ -148,11 +147,11 @@ workflows:
     jobs:
       - build:
           requires:
-            - build_android
+            - build_test_app_android
           filters:
             tags:
               only: /.*/
-      - build_android:
+      - build_test_app_android:
           # requires:
           #   - build
           filters:
@@ -160,7 +159,7 @@ workflows:
               only: /.*/
       - npm_publish:
           requires:
-            - build_android
+            - build_test_app_android
           filters:
             tags:
               only: /.*/ # allow anything because tag syntax is validated as part of validate-release.sh
