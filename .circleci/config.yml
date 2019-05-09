@@ -72,6 +72,8 @@ jobs:
         # publish npm packages to local verdaccio instance for testing
       - run: npm set registry http://verdaccio_instance:4873/
       - run: npx npm-cli-login -u test -p test -e test@example.com -r http://verdaccio_instance:4873
+      - run: git config --global user.email "test@example.com"
+      - run: git config --global user.name "test"
       - run: npx lerna version prerelease --no-push --yes
       - run: CI=true npm run release:prep
       - run: TAG=$CIRCLE_TAG npm run release:validate
