@@ -95,7 +95,7 @@ jobs:
           root: ~/tests/testing-app/platforms/android/app/build/outputs/apk/debug/
           paths:
             - app-debug.apk
-  test-android:
+  test_android:
     docker:
       - image: circleci/node:carbon
       - image: jboss/keycloak
@@ -139,7 +139,7 @@ workflows:
     jobs:
       - build:
           requires:
-            - build_android
+            - test_android
           filters:
             tags:
               only: /.*/
@@ -157,7 +157,7 @@ workflows:
               only: /.*/
       - npm_publish:
           requires:
-            - build_android
+            - test_android
           filters:
             tags:
               only: /.*/ # allow anything because tag syntax is validated as part of validate-release.sh
