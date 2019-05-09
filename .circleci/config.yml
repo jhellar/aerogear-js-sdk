@@ -75,9 +75,10 @@ jobs:
       - run: git config --global user.email "test@example.com"
       - run: git config --global user.name "test"
       - run: npx lerna version prerelease --no-push --yes
+      - run: export TAG=$(node -e "console.log(require('./lerna.json').version);")
       - run: CI=true npm run release:prep
-      - run: TAG=$CIRCLE_TAG npm run release:validate
-      - run: TAG=$CIRCLE_TAG npm run publish
+      - run: npm run release:validate
+      - run: npm run publish
       - run: echo stop && false
 
 workflows:
