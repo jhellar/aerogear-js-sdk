@@ -61,10 +61,10 @@ jobs:
       - run: CI=true npm run release:prep
       - run: TAG=$CIRCLE_TAG npm run release:validate
       - run: TAG=$CIRCLE_TAG npm run publish
-  integration_test:
+  build_android:
     working_directory: ~/aerogear
     docker:
-      - image: circleci/node:lts
+      - image: circleci/android:api-28-node
       - image: verdaccio/verdaccio
         name: verdaccio_instance
     steps:
@@ -84,6 +84,62 @@ jobs:
           command: |
             TAG=$(node -e "console.log(require('./lerna.json').version);") \
             npm run publish
+        # build cordova testing app
+      - run:
+          command: git clone https://github.com/jhellar/aerogear-integration-tests.git .
+          working_directory: ~/tests
+      - run:
+          name: Install gradle
+          command: sudo apt install gradle
+      - run:
+          name: Install cordova
+          command: sudo npm --global install cordova@8
+      - run:
+          name: Create cordova app
+          command: cordova create testing-app
+          working_directory: ~/tests
+      - run:
+          name: Copy fixtures
+          command: |
+            cp fixtures/config.xml testing-app/
+            cp fixtures/index.html testing-app/www/
+            cp fixtures/webpack.config.js testing-app/
+            cp fixtures/index.js testing-app/
+          working_directory: ~/tests
+      - run:
+          name: Install dependencies
+          command: |
+            npm install --save \
+              @aerogear/security \
+              @aerogear/app \
+              @aerogear/auth \
+              webpack \
+              webpack-cli && \
+            cat package.json
+          working_directory: ~/tests/testing-app
+      - run:
+          name: Install cordova plugins
+          command: |
+            cordova plugin add @aerogear/cordova-plugin-aerogear-security && \
+            cordova plugin add cordova-plugin-inappbrowser
+          working_directory: ~/tests/testing-app
+      - run:
+          name: Webpack build
+          command: npx webpack
+          working_directory: ~/tests/testing-app
+      - run:
+          name: Add Android platform
+          command: cordova platform add android
+          working_directory: ~/tests/testing-app
+      - run:
+          name: Build android app
+          command: cordova build android
+          working_directory: ~/tests/testing-app
+      - persist_to_workspace:
+          root: platforms/android/app/build/outputs/apk/debug/
+          paths:
+            - app-debug.apk
+          working_directory: ~/tests/testing-app
       - run: echo stop && false
 
 workflows:
