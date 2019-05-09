@@ -1,6 +1,6 @@
 {
   "name": "@aerogear/voyager-client",
-  "version": "2.5.0-dev.1",
+  "version": "2.4.1-alpha.0",
   "description": "AeroGear Voyager GraphQL client",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -34,10 +34,10 @@
     "@types/apollo-upload-client": "8.1.1",
     "@types/chai": "4.1.7",
     "@types/debug": "4.1.4",
+    "@types/fetch-mock": "7.2.3",
     "@types/graphql": "14.2.0",
     "@types/mocha": "5.2.6",
     "@types/ws": "6.0.1",
-    "@types/fetch-mock": "7.2.3",
     "chai": "4.2.0",
     "del": "4.1.1",
     "fetch-mock": "7.3.3",
@@ -46,7 +46,7 @@
     "typescript": "3.4.5"
   },
   "dependencies": {
-    "@aerogear/core": "2.4.0",
+    "@aerogear/core": "2.4.1-alpha.0",
     "apollo-cache-inmemory": "1.5.1",
     "apollo-cache-persist": "0.1.1",
     "apollo-client": "2.5.1",
